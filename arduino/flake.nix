@@ -1,6 +1,18 @@
 {
   description = "of-the-star's custom arduino rust development flake";
 
+  welcomeText = ''
+    # A flake-based Arduino Uno Rust workflow
+
+    Before you start, run 
+
+    ```sh
+    nix run .#updateSrc
+    ```
+
+    to vendor the core dependencies and run it each time you update the lockfile.
+  '';
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
