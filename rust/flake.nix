@@ -1,10 +1,14 @@
 {
+  # TODO: Change description for project
   description = "of-the-star's custom rust development flake";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    crane.url = "github:ipetkov/crane";
+    crane = {
+      url = "github:ipetkov/crane";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -35,7 +39,7 @@
             pkgs.rust-bin.selectLatestNightlyWith (
               toolchain:
               toolchain.default.override {
-                # extensions = [ "rust-src" ];
+                extensions = [ "rust-src" ];
               }
             );
 
@@ -72,7 +76,7 @@
           packages = with pkgs; [
           ];
 
-          shellHook = '''';
+          shellHook = "";
 
           env = {
             # Needed for rust-analyzer
@@ -82,7 +86,7 @@
 
         packages.default = crane-package;
 
-        formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
+        formatter = pkgs.nixfmt-tree;
       }
     );
 }
