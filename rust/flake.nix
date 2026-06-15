@@ -36,12 +36,9 @@
           if builtins.pathExists ./rust-toolchain.toml then
             pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml
           else
-            pkgs.rust-bin.selectLatestNightlyWith (
-              toolchain:
-              toolchain.default.override {
-                extensions = [ "rust-src" ];
-              }
-            );
+            pkgs.rust-bin.stable.latest.default.override {
+              extensions = [ "rust-src" ];
+            };
 
         # Instantiates custom craneLib using toolchain
         craneLib = (crane.mkLib pkgs).overrideToolchain rust-toolchain;
@@ -54,7 +51,12 @@
           inherit src;
           strictDeps = true;
 
+          nativeBuildInputs = with pkgs; [
+            pkg-config
+          ];
+
           buildInputs = with pkgs; [
+            openssl
           ];
         };
 
