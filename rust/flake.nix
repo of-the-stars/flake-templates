@@ -31,6 +31,7 @@
           inherit system;
           overlays = [ (import rust-overlay) ];
         };
+      # perSystemPkgs = f: nixpkgs.lib.genAttrs systems (system: f (pkgsFor system));
       packageForSystem =
         system:
         let
@@ -116,8 +117,8 @@
         pkgs.nixfmt-tree;
     in
     {
-      # packages = forAllSystems (system: packageForSystem system);
-      # devShells = forAllSystems (system: devShellForSystem system);
-      # formatter = forAllSystems (system: formatterForSystem system);
+      packages = forAllSystems (system: packageForSystem system);
+      devShells = forAllSystems (system: devShellForSystem system);
+      formatter = forAllSystems (system: formatterForSystem system);
     };
 }
