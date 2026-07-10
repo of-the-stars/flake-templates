@@ -1,6 +1,5 @@
 {
-  # TODO: Change description for project
-  description = "of-the-star's custom rust development flake";
+  description = "of-the-star's custom rust development flake"; # TODO: Change description for project
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -24,20 +23,15 @@
       systems = [
         "x86_64-linux"
       ];
-      forAllSystems = nixpkgs.lib.genAttrs systems;
-      pkgsFor =
-        system:
-        import nixpkgs {
-          inherit system;
-          overlays = [ (import rust-overlay) ];
-        };
-      # perSystemPkgs = f: nixpkgs.lib.genAttrs systems (system: f (pkgsFor system));
-      packageForSystem =
+      eachSystem = nixpkgs.lib.genAttrs systems;
+      forSystem =
         system:
         let
-          pkgs = (pkgsFor system);
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ (import rust-overlay) ];
+          };
 
-          # Builds the rust components from the toolchain file, or defaults back to the latest nightly build
           rust-toolchain =
             if builtins.pathExists ./rust-toolchain.toml then
               pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml
@@ -68,7 +62,7 @@
 
           cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 
-          crane-package = craneLib.buildPackage (
+          package = craneLib.buildPackage (
             commonArgs
             // {
               inherit cargoArtifacts;
@@ -76,26 +70,15 @@
           );
         in
         {
-          default = crane-package;
-        };
-      devShellForSystem =
-        system:
-        let
-          pkgs = pkgsFor system;
+          inherit
+            package
+            ;
 
-          # Builds the rust components from the toolchain file, or defaults back to the latest nightly build
-          rust-toolchain =
-            if builtins.pathExists ./rust-toolchain.toml then
-              pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml
-            else
-              pkgs.rust-bin.stable.latest.default.override {
-                extensions = [ "rust-src" ];
-              };
-        in
-        {
-          default = pkgs.mkShell {
+          "${pname}" = package;
+
+          devShell = pkgs.mkShell {
             # Inherits buildInputs from crane-package
-            inputsFrom = [ (packageForSystem system) ];
+            inputsFrom = [ package ];
 
             # Additional packages for the dev environment
             packages = with pkgs; [
@@ -108,17 +91,23 @@
               RUST_SRC_PATH = "${rust-toolchain}/lib/rustlib/src/rust/library";
             };
           };
+
+          formatter = pkgs.nixfmt-tree;
         };
-      formatterForSystem =
-        system:
-        let
-          pkgs = pkgsFor system;
-        in
-        pkgs.nixfmt-tree;
     in
     {
-      packages = forAllSystems (system: packageForSystem system);
-      devShells = forAllSystems (system: devShellForSystem system);
-      formatter = forAllSystems (system: formatterForSystem system);
+      devShells = (
+        eachSystem (system: {
+          default = (forSystem system).devShell;
+        })
+      );
+
+      formatter = (eachSystem (system: (forSystem system).formatter));
+
+      packages = (
+        eachSystem (system: {
+          default = (forSystem system).package;
+        })
+      );
     };
 }
