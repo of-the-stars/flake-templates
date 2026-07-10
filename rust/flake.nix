@@ -44,7 +44,7 @@
           craneLib = (crane.mkLib pkgs).overrideToolchain rust-toolchain;
 
           src = craneLib.cleanCargoSource ./.;
-          pname = craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; }.pname;
+          pname = (craneLib.crateNameFromCargoToml { cargoToml = ./Cargo.toml; }).pname;
 
           # Common arguments shared between buildPackage and buildDepsOnly
           commonArgs = {
