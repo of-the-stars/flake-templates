@@ -23,7 +23,7 @@
       systems = [
         "x86_64-linux"
       ];
-      eachSystem = nixpkgs.lib.genAttrs systems;
+      iterOverSystems = nixpkgs.lib.genAttrs systems;
       forSystem =
         system:
         let
@@ -97,15 +97,15 @@
     in
     {
       devShells = (
-        eachSystem (system: {
+        iterOverSystems (system: {
           default = (forSystem system).devShell;
         })
       );
 
-      formatter = (eachSystem (system: (forSystem system).formatter));
+      formatter = (iterOverSystems (system: (forSystem system).formatter));
 
       packages = (
-        eachSystem (system: {
+        iterOverSystems (system: {
           default = (forSystem system).package;
         })
       );
