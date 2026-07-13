@@ -25,6 +25,17 @@
         arduino = {
           path = ./arduino;
           description = "A rust development flake for targeting the Arduino Uno";
+          welcomeText = ''
+            # A flake-based Arduino Uno Rust workflow
+
+            Before you start, run 
+
+            ```sh
+            nix run .#updateSrc
+            ```
+
+            to vendor the core dependencies and run it each time you update the lockfile.
+          '';
         };
       };
     };

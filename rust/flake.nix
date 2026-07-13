@@ -77,7 +77,7 @@
           "${pname}" = package;
 
           devShell = pkgs.mkShell {
-            # Inherits buildInputs from crane-package
+            # Inherits buildInputs from package
             inputsFrom = [ package ];
 
             # Additional packages for the dev environment
@@ -92,7 +92,7 @@
             };
           };
 
-          formatter = pkgs.nixfmt-tree;
+          formatter = pkgs.nixfmt-tree; # Nix flake formatter. Run `nix fmt` to use
         };
     in
     {

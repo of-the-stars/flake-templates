@@ -1,52 +1,69 @@
 {
-  description = "A basic flake for dev environments and packaging";
+  description = "A very basic, yet somehow still opinionated flake for dev environments and packaging"; # TODO: Change description for project
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
     {
       self,
       nixpkgs,
-      flake-utils,
     }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        # TODO: Change package name
-        pname = "foo";
-        src = ./.;
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            # TODO: Place development dependencies in here
-            # package managers, build tools, debuggers, etc
+    let
+      systems = [
+        "x86_64-linux"
+      ];
+      iterOverSystems = nixpkgs.lib.genAttrs systems;
+      forSystem =
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          name = "foo"; # TODO: Change package name
+          src = ./.;
+        in
+        {
+          devShell = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              # TODO: Place development dependencies in here
+              # package managers, build tools, debuggers, etc
 
-            # for example
-            gnumake # this is a build tool, you just add the package name
-          ];
+              # for example
+              gnumake # this is a build tool, you just add the package name
+            ];
 
-          # Run whatever commands you'd like when entering the shell
-          shellHook = ''
-            echo "Entering nix shell!!";
-          '';
+            # Run whatever commands you'd like when entering the shell
+            shellHook = ''
+              echo "Entering nix shell!!";
+            '';
+          };
+
+          package = derivation {
+            inherit system name src;
+
+            builder = with pkgs; "${bash}/bin/bash"; # TODO: Add package build step
+            args = [
+              "-c"
+              "echo Building! > $out"
+            ];
+          };
+
+          formatter = pkgs.nixfmt-tree; # Nix flake formatter. Run `nix fmt` to use
         };
+    in
+    {
+      devShells = (
+        iterOverSystems (system: {
+          default = (forSystem system).devShell;
+        })
+      );
 
-        packages.default = derivation {
-          inherit system pname src;
-          # TODO: Add package build step
-          builder = with pkgs; "${bash}/bin/bash";
-          args = [
-            "-c"
-            "echo foo > $out"
-          ];
-        };
+      formatter = (iterOverSystems (system: (forSystem system).formatter));
 
-        formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
-      }
-    );
+      packages = (
+        iterOverSystems (system: {
+          default = (forSystem system).package;
+        })
+      );
+    };
 }

@@ -1,48 +1,64 @@
 {
-  description = "A very basic, somehow still opinionated, flake";
+  description = "A very basic, yet somehow still opinionated Python flake"; # TODO: Change description for project
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
     {
       self,
       nixpkgs,
-      flake-utils,
     }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        # TODO: Change package name
-        name = "foo";
-        src = ./.;
-      in
-      {
-        devShells.default =
-          with pkgs;
-          mkShell {
-            buildInputs = [
-              python3Packages.python
-              python3Packages.venvShellHook
+    let
+      systems = [
+        "x86_64-linux"
+      ];
+      iterOverSystems = nixpkgs.lib.genAttrs systems;
+      forSystem =
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          name = "foo"; # TODO: Change package name
+          src = ./.;
+        in
+        {
+          devShell =
+            with pkgs;
+            mkShell {
+              buildInputs = [
+                python3Packages.python
+                python3Packages.venvShellHook
+              ];
+              venvDir = "./.venv";
+            };
+
+          package = derivation {
+            inherit system name src;
+
+            builder = with pkgs; "${bash}/bin/bash"; # TODO: Add package build step
+            args = [
+              "-c"
+              "echo Building! > $out"
             ];
-            venvDir = "./.venv";
           };
 
-        packages.default = derivation {
-          inherit system name src;
-          # TODO: Add package build step
-          builder = with pkgs; "${bash}/bin/bash";
-          args = [
-            "-c"
-            "echo Building! > $out"
-          ];
+          formatter = pkgs.nixfmt-tree; # Nix flake formatter. Run `nix fmt` to use
         };
+    in
+    {
+      devShells = (
+        iterOverSystems (system: {
+          default = (forSystem system).devShell;
+        })
+      );
 
-        formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-tree;
+      formatter = (iterOverSystems (system: (forSystem system).formatter));
 
-      }
-    );
+      packages = (
+        iterOverSystems (system: {
+          default = (forSystem system).package;
+        })
+      );
+    };
 }
