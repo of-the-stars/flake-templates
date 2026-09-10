@@ -25,17 +25,7 @@
         {
           devShell = pkgs.mkShell {
             buildInputs = with pkgs; [
-              # TODO: Place development dependencies in here
-              # package managers, build tools, debuggers, etc
-
-              # for example
-              gnumake # this is a build tool, you just add the package name
             ];
-
-            # Run whatever commands you'd like when entering the shell
-            shellHook = ''
-              echo "Entering nix shell!!";
-            '';
           };
 
           package = derivation {
@@ -52,18 +42,14 @@
         };
     in
     {
-      devShells = (
-        iterOverSystems (system: {
-          default = (forSystem system).devShell;
-        })
-      );
+      inherit (iterOverSystems (system: forSystem system)) formatter;
 
-      formatter = (iterOverSystems (system: (forSystem system).formatter));
+      devShells = iterOverSystems (system: {
+        default = (forSystem system).devShell;
+      });
 
-      packages = (
-        iterOverSystems (system: {
-          default = (forSystem system).package;
-        })
-      );
+      packages = iterOverSystems (system: {
+        default = (forSystem system).package;
+      });
     };
 }

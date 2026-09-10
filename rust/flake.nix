@@ -96,18 +96,14 @@
         };
     in
     {
-      devShells = (
-        iterOverSystems (system: {
-          default = (forSystem system).devShell;
-        })
-      );
+      inherit (iterOverSystems (system: forSystem system)) formatter;
 
-      formatter = (iterOverSystems (system: (forSystem system).formatter));
+      devShells = iterOverSystems (system: {
+        default = (forSystem system).devShell;
+      });
 
-      packages = (
-        iterOverSystems (system: {
-          default = (forSystem system).package;
-        })
-      );
+      packages = iterOverSystems (system: {
+        default = (forSystem system).package;
+      });
     };
 }
