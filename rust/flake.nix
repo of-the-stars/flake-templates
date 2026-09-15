@@ -96,7 +96,7 @@
         };
     in
     {
-      inherit (iterOverSystems (system: forSystem system)) formatter;
+      formatter = iterOverSystems (system: (forSystem system).formatter);
 
       devShells = iterOverSystems (system: {
         default = (forSystem system).devShell;
