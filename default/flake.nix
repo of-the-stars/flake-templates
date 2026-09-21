@@ -19,7 +19,7 @@
         system:
         let
           pkgs = import nixpkgs { inherit system; };
-          name = "foo"; # TODO: Change package name
+          pname = "foo"; # TODO: Change package name
           src = ./.;
         in
         {
@@ -28,14 +28,11 @@
             ];
           };
 
-          package = derivation {
-            inherit system name src;
-
-            builder = with pkgs; "${bash}/bin/bash"; # TODO: Add package build step
-            args = [
-              "-c"
-              "echo Building! > $out"
-            ];
+          package = pkgs.stdenv.mkDerivation {
+            inherit
+              src
+              pname
+              ;
           };
 
           formatter = pkgs.nixfmt-tree; # Nix flake formatter. Run `nix fmt` to use
