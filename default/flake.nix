@@ -18,7 +18,7 @@
       forSystem =
         system:
         let
-          pkgs = import nixpkgs { inherit system; };
+          pkgs = nixpkgs.legacyPackages.${system};
           pname = "foo"; # TODO: Change package name
           src = ./.;
         in
