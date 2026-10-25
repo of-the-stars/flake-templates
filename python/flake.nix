@@ -2,7 +2,7 @@
   description = "A very basic, yet somehow still opinionated Python flake"; # TODO: Change description for project
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs";
   };
 
   outputs =

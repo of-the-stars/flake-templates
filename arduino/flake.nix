@@ -2,7 +2,7 @@
   description = "of-the-star's custom arduino rust development flake"; # TODO: Change description for project
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs";
     crane = {
       url = "github:ipetkov/crane";
     };
