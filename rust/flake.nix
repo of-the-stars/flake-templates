@@ -48,7 +48,7 @@
 
           # Common arguments shared between buildPackage and buildDepsOnly
           commonArgs = {
-            inherit src;
+            inherit src pname;
             strictDeps = true;
 
             nativeBuildInputs = with pkgs; [
